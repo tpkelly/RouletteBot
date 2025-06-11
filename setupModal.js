@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ChannelSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ChannelType, ButtonBuilder } = require('discord.js');
+const { ActionRowBuilder, ChannelSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ChannelType, ButtonBuilder, PermissionsBitField } = require('discord.js');
 const common = require('./common.js');
 
 /** Helper functions */
@@ -147,10 +147,33 @@ async function setDate(interaction) {
 
 /** Summary */
 
-async function summaryPage(interaction) {
+function boolIcon(value) {
+  return value ? ':white_check_mark:' : ':x:';
+}
+
+async function info(interaction) {
   var doc = await interaction.client.mongo.collection('config').findOne({ _id: interaction.guild.id }) || {};
 
-  var embed = common.styledEmbed('Configuration Summary', '');
+  if (!doc.channel) {
+    return common.styledEmbed('Summary', 'This server has not yet been configured. Run the `/setup` command to begin.');
+  }
+
+  var targetChannel = await interaction.guild.channels.fetch(doc.channel);
+  var me = await interaction.guild.members.fetchMe();
+  var cPerms = targetChannel.permissionsFor(me)
+  var sPerms = me.permissions;
+
+  var embed = common.styledEmbed('Summary', `### Designated Channel Permissions
+- ${boolIcon(targetChannel.viewable)} Can view <#${doc.channel}>
+- ${boolIcon(cPerms.has(PermissionsBitField.Flags.SendMessages))} Can send messages in channel
+- ${boolIcon(cPerms.has(PermissionsBitField.Flags.CreatePrivateThreads))} Can create Private Threads
+- ${boolIcon(cPerms.has(PermissionsBitField.Flags.SendMessagesInThreads))} Can send messages in Threads
+
+### Server Permissions
+- ${boolIcon(sPerms.has(PermissionsBitField.Flags.ManageRoles))} Can Manage Roles
+- ${boolIcon(sPerms.has(PermissionsBitField.Flags.ManageThreads))} Can Manage Threads
+- ${boolIcon(sPerms.has(PermissionsBitField.Flags.MentionEveryone))} Can mention <@${doc.notificationRole || interaction.guild.roles.everyone}>
+`);
   
   embed.fields =   [
     { name: 'Channel', value: `<#${doc.channel}>` },
@@ -158,7 +181,12 @@ async function summaryPage(interaction) {
     { name: 'Frequency', value: `${displayTextFrequency[doc.frequency]}` },
     { name: 'Next Roulette', value: `<t:${doc.date}:f>` },
   ]
-  
+
+  return embed;
+}
+
+async function summaryPage(interaction) {
+  var embed = await info(interaction);
   var buttonRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setLabel('Back').setStyle('Secondary').setCustomId('config-summary-prev'),
     new ButtonBuilder().setLabel('Finish').setStyle('Primary').setCustomId('config-finish'));
@@ -180,5 +208,6 @@ module.exports = {
   modePage: modePage,
   setMode: setMode,
   summaryPage: summaryPage,
+  info: info,
   finish: finish
 };
