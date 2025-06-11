@@ -10,7 +10,7 @@ const client = new Client({
 const auth = require('./auth.json');
 
 client.once('ready', async () => {
-  client.user.setActivity("If broke, return to Kazenone");
+  client.user.setActivity('Roll, "Hey", Roleplay!');
   
   client.mongo = new MongoClient(auth.mongodb).db();
   

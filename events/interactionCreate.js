@@ -53,11 +53,16 @@ async function componentInteraction(interaction, client) {
       return;
 
     case 'config-mode-next':
-    case 'config-summary-prev':
+    case 'config-role-prev':
       await setup.datePage(interaction);
       return;
 
     case 'config-date-next':
+    case 'config-summary-prev':
+      await setup.rolePage(interaction);
+      return;
+
+    case 'config-role-next':
       await setup.summaryPage(interaction);
       return;
       
@@ -76,6 +81,14 @@ async function componentInteraction(interaction, client) {
 
     case 'roulette-mode':
       await setup.setMode(interaction);
+      return;
+      
+    case 'roulette-role':
+      await setup.setRole(interaction);
+      return;
+    
+    case 'config-role-new':
+      await setup.newRole(interaction);
       return;
 }
   
