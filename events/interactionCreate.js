@@ -1,4 +1,5 @@
 const setup = require('../setupModal.js');
+const common = require('../common.js');
 const { Events } = require('discord.js');
 
 function noSuchCommand(client, interaction) {
@@ -34,8 +35,14 @@ async function commandInteraction(interaction, client) {
 }
 
 async function componentInteraction(interaction, client) {
-  await interaction.deferUpdate();
+  if (interaction.customId === 'roulette-join') {
+    await interaction.deferReply({ ephemeral: true });
+    await common.register(interaction);
+    return;
+  }
 
+  await interaction.deferUpdate();
+  
   // Change pages on Setup command
   switch (interaction.customId) {
     case 'config-frequency-prev':
@@ -90,7 +97,7 @@ async function componentInteraction(interaction, client) {
     case 'config-role-new':
       await setup.newRole(interaction);
       return;
-}
+  }
   
   if (interaction.customId.startsWith('config-date-set-')) {
     interaction.values = [ interaction.customId.substring(18) ];

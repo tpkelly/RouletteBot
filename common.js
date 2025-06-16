@@ -18,7 +18,37 @@ function sendHook(hookId, hookToken, messageData) {
   return hook.send(messageData).catch(err => console.error(err));
 }
 
+async function register(interaction) {
+  var config = await interaction.client.mongo.collection('config').findOne({ _id: interaction.guild.id }) || {};
+  
+  if (!config) {
+    return;
+  }
+  
+  // Create a roulette role if none already exists  
+  if (!config.rouletteRole) {
+    var newGuildRole = await interaction.guild.roles.create({ name: 'Roulette Entry', reason: 'New role for roleplay roulettes' }).catch(console.error);
+
+    await interaction.client.mongo.collection('config').findOneAndUpdate(
+      { _id: interaction.guild.id },
+      { $set: { rouletteRole: newGuildRole.id } }
+    );
+
+    config.rouletteRole = newGuildRole.id;
+  }
+  
+  // Check if they already have the role
+  if (interaction.member.roles.cache.some(role => role.id == config.rouletteRole)) {
+    interaction.editReply({ embeds: [styledEmbed('Roleplay Roulette', ':warning: You are already registered for the next Roleplay Roulette')]});
+    return;
+  }
+  
+  interaction.member.roles.add(config.rouletteRole, 'Signed up for Roleplay Roulette');
+  interaction.editReply({ embeds: [styledEmbed('Roleplay Roulette', 'You have been registered for the next Roleplay Roulette')]});
+}
+
 module.exports = {
   styledEmbed: styledEmbed,
-  sendHook: sendHook
+  sendHook: sendHook,
+  register: register
 };

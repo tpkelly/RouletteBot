@@ -19,16 +19,16 @@ async function setup(client, config) {
   
   switch (config.mode) {
     case 'w': // Weekly
-      updateDate.date = `${Number(config.date) + 7*24*60*60}`
+      updateData.date = `${Number(config.date) + 7*24*60*60}`
       break;
     case 'f': // Fortnightly
-      updateDate.date = `${Number(config.date) + 14*24*60*60}`
+      updateData.date = `${Number(config.date) + 14*24*60*60}`
       break;
     case 'm': // Monthly
       var todayMillis = Number(config.date) * 1000;
       var todayDate = new Date(todayMillis);
       todayDate.setUTCMonth(todayDate.getUTCMonth()+1)
-      updateDate.date = `${Math.floor(todayDate.getTime() / 1000)}`
+      updateData.date = `${Math.floor(todayDate.getTime() / 1000)}`
       break;
   }
   
