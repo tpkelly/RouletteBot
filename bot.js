@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 const fs = require('fs');
 
 const client = new Client({
-  intents: [IntentsBitField.Flags.Guilds],
+  intents: [IntentsBitField.Flags.GuildMembers, IntentsBitField.Flags.Guilds],
   partials: ['MESSAGE', 'CHANNEL']
 });
 

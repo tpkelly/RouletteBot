@@ -62,31 +62,57 @@ async function generateMatches(guild, config) {
 }
 
 async function notifyMatches(guild, config, matches) {
-  if (matches.length == 0) {
-    return;
-  }
-  
-  var notifyFunc;
+  var rouletteChannel = guild.channels.resolve(config.channel);
   switch (config.mode) {
     case 'post':
+      await rouletteChannel.send(notifyPost.matches).catch(console.error);
+      
     case 'manual':
+      return notifyPost(matches);
       
     case 'thread':
-      notifyFunc = setupRouletteChannel;
+      await notifyThreads(rouletteChannel, config, matches);
       break;
       
     default:
       throw `Unknown roulette mode: ${config.mode}`;
   }
+}
+
+function notifyPost(matches) {
+  if (matches.length == 0) {
+    return 'Not enough participants for a roulette';
+  }
+
+  var messagePost = `__Roulette Matches__
+
+Welcome to another roulette draw! The rules are simple - at some point during the roulette period, talk with your partner to arrange a small one-on-one roleplay session. There is no set limit on duration, location, topics... Just do some small roleplay together!
+`;
   
-  var rouletteChannel = guild.channels.resolve(config.channel);
   // We have an odd number, so make the first pair a triple
   if (matches.length % 2 == 1) {
-    await notifyFunc(rouletteChannel, [matches.pop(), matches.pop(), matches.pop()], config);
+    messagePost += `<@${matches.pop()}> + <@${matches.pop()}> + <@${matches.pop()}>` + '\n'
   }
   
   while (matches.length > 0) {
-    await notifyFunc(rouletteChannel, [matches.pop(), matches.pop()], config);
+    messagePost += `<@${matches.pop()}> + <@${matches.pop()}>` + '\n'
+  }
+  
+  return messagePost;
+}
+
+async function notifyThreads(channel, config, matches) {
+  if (matches.length == 0) {
+    return;
+  }
+
+  // We have an odd number, so make the first pair a triple
+  if (matches.length % 2 == 1) {
+    await setupRouletteChannel(rouletteChannel, [matches.pop(), matches.pop(), matches.pop()], config);
+  }
+  
+  while (matches.length > 0) {
+    await setupRouletteChannel(rouletteChannel, [matches.pop(), matches.pop()], config);
   }
 }
 
@@ -110,7 +136,7 @@ async function setupRouletteChannel(parentChannel, roleplayers, config) {
 
 // If this is a dry run, then the matches will be printed but will not be announced. This is intended for manual matches only
 async function draw(client, config) {
-  var guild = client.guilds.resolve(config._id);
+  var guild = await client.guilds.fetch(config._id);
   return await generateMatches(guild, config)
     .then(matches => notifyMatches(guild, config, matches))
     .catch(console.error);
