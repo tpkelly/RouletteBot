@@ -17,6 +17,6 @@ module.exports = {
     var config = await interaction.client.mongo.collection('config').findOne({ _id: interaction.guild.id }) || {};
     
     var message = await tasks.draw(interaction.client, config);
-    await interaction.editReply(message);
+    await interaction.editReply(message || 'Processed');
   }
 };

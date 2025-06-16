@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ChannelType } = require('discord.js');
 const common = require('../common.js');
 
 async function setup(client, config) {
@@ -108,11 +108,11 @@ async function notifyThreads(channel, config, matches) {
 
   // We have an odd number, so make the first pair a triple
   if (matches.length % 2 == 1) {
-    await setupRouletteChannel(rouletteChannel, [matches.pop(), matches.pop(), matches.pop()], config);
+    await setupRouletteChannel(channel, [matches.pop(), matches.pop(), matches.pop()], config);
   }
   
   while (matches.length > 0) {
-    await setupRouletteChannel(rouletteChannel, [matches.pop(), matches.pop()], config);
+    await setupRouletteChannel(channel, [matches.pop(), matches.pop()], config);
   }
 }
 
