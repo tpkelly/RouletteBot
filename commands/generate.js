@@ -2,7 +2,7 @@ const { PermissionsBitField, ApplicationCommandOptionType } = require('discord.j
 const tasks = require('../tasks/rouletteTasks.js');
 
 module.exports = {
-  name: 'draw',
+  name: 'generate',
   description: 'Manually draw the roulette matches',
   options: [{ type: ApplicationCommandOptionType.Boolean, name: "dry-run", description: "If true, will only do a dry-run of the draw, and will not remove roles from users. Defaults to false", required: false }],
   executeInteraction: async(interaction) => {

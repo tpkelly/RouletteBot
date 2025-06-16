@@ -17,7 +17,7 @@ async function setup(client, config) {
     updateData = { drawDate: `${Number(config.date) + 48*60*60}` };
   }
   
-  switch (config.mode) {
+  switch (config.frequency) {
     case 'w': // Weekly
       updateData.date = `${Number(config.date) + 7*24*60*60}`
       break;
