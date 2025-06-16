@@ -37,8 +37,9 @@ client.once('ready', async () => {
             { $unset: { drawDate: '' } }
           );
           continue;
+        } else {
+          await tasks.draw(client, config)
         }
-        await tasks.draw(client, config)
       } catch (err) {
         console.error(err);
       }

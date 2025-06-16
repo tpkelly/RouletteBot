@@ -38,9 +38,82 @@ async function setup(client, config) {
   );
 }
 
-async function draw(client, config, dryRun) { // If this is a dry run, then the matches will be printed but will not be announced. This is intended for manual matches only
-  
+// Fisher-Yates shuffle algorithm
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
+async function generateMatches(guild, config) {
+  return guild.members.fetch()
+    .then(() => guild.roles.fetch(config.rouletteRole))
+    .then(async rouletteRole => {
+      if (rouletteRole.members.size < 2) {
+        return [];
+      }
+      
+      var matches = shuffleArray(Array.from(rouletteRole.members.keys()));
+     
+      return matches;
+    });
+}
+
+async function notifyMatches(guild, config, matches) {
+  if (matches.length == 0) {
+    return;
+  }
+  
+  var notifyFunc;
+  switch (config.mode) {
+    case 'post':
+    case 'manual':
+      
+    case 'thread':
+      notifyFunc = setupRouletteChannel;
+      break;
+      
+    default:
+      throw `Unknown roulette mode: ${config.mode}`;
+  }
+  
+  var rouletteChannel = guild.channels.resolve(config.channel);
+  // We have an odd number, so make the first pair a triple
+  if (matches.length % 2 == 1) {
+    await notifyFunc(rouletteChannel, [matches.pop(), matches.pop(), matches.pop()], config);
+  }
+  
+  while (matches.length > 0) {
+    await notifyFunc(rouletteChannel, [matches.pop(), matches.pop()], config);
+  }
+}
+
+async function setupRouletteChannel(parentChannel, roleplayers, config) {
+  await parentChannel.threads.create({
+    name: 'Roleplay Roulette',
+    type: ChannelType.PrivateThread,
+    invitable: false
+  }).then(async thread => {
+    // Invite the matches together
+    for (const player of roleplayers) {
+      await thread.members.add(player);
+      var member = await parentChannel.guild.members.fetch(player);
+      await member.roles.remove(config.rouletteRole);
+    }
+    
+    var embed = common.styledEmbed('Roleplay Roulette', 'Welcome to the Roleplay Roulette!\n\nThe aim of the roulette is to match people together and have them organise some roleplay together. It might be a small scene alone, or you might want to meet at one of the many venues to roleplay together there instead.\n\nIt is down to you both to decide when, where and how you want to roleplay. Maybe a fight scene? A small comfortable chat? A chance encounter? Old friends reuniting? Just make sure to do it before the next roulette! If you are stuck for ideas, try the `/rpdice` bot command for some suggestions.\n\n**And last of all, have fun!**');
+    await thread.send({ content: `<@${roleplayers.join('> <@')}>`, embeds: [embed]});
+  });
+}
+
+// If this is a dry run, then the matches will be printed but will not be announced. This is intended for manual matches only
+async function draw(client, config) {
+  var guild = client.guilds.resolve(config._id);
+  return await generateMatches(guild, config)
+    .then(matches => notifyMatches(guild, config, matches))
+    .catch(console.error);
 }
 
 module.exports = {
