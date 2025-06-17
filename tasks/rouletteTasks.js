@@ -56,6 +56,11 @@ async function generateMatches(guild, config) {
       }
       
       var matches = shuffleArray(Array.from(rouletteRole.members.keys()));
+      
+      // After we have our matches, remove the role from the users
+      for (const [key, member] of rouletteRole.members) {
+        await member.roles.remove(config.rouletteRole);
+      }
      
       return matches;
     });
@@ -134,11 +139,20 @@ async function setupRouletteChannel(parentChannel, roleplayers, config) {
   });
 }
 
+async function cleanupData(guild, config) {
+  // Prevent from re-triggering the draw
+  await guild.client.mongo.collection('config').findOneAndUpdate(
+    { _id: config._id },
+    { $unset: { drawDate: '' } }
+  );
+}
+
 // If this is a dry run, then the matches will be printed but will not be announced. This is intended for manual matches only
 async function draw(client, config) {
   var guild = await client.guilds.fetch(config._id);
   return await generateMatches(guild, config)
     .then(matches => notifyMatches(guild, config, matches))
+    .then(() => cleanupData(guild, config))
     .catch(console.error);
 }
 
