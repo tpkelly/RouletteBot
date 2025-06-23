@@ -44,3 +44,5 @@ The details of the [Privileged intents](https://support.discord.com/hc/en-us/art
 # Contact
 
 Comments, questions, concerns or suggestions? I'm more than happy to hear them! I'm on discord as "kazenone", and you are more than welcome to send a message or friend request
+
+Logo Artwork by [@feelingkoi](https://ko-fi.com/feelingkoi)

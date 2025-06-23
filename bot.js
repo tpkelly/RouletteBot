@@ -1,4 +1,4 @@
-const { Client, Collection, IntentsBitField, ApplicationCommandType } = require('discord.js');
+const { Client, Collection, IntentsBitField, ApplicationCommandType, ActivityType } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const fs = require('fs');
 
@@ -10,7 +10,7 @@ const client = new Client({
 const auth = require('./auth.json');
 
 client.once('ready', async () => {
-  client.user.setActivity('Roll, "Hey", Roleplay!');
+  client.user.setActivity({ name: 'Roll, "Hey", Roleplay!', type: ActivityType.Custom });
   
   client.mongo = new MongoClient(auth.mongodb).db();
   
