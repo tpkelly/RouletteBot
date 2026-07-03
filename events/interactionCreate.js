@@ -3,7 +3,7 @@ const common = require('../common.js');
 const { Events } = require('discord.js');
 
 function noSuchCommand(client, interaction) {
-  interaction.editReply({ content: 'No such command', ephemeral: true })
+  interaction.reply({ content: 'No such command', ephemeral: true })
     .catch(err => console.log(err));
 }
 
