@@ -70,7 +70,7 @@ async function notifyMatches(guild, config, matches) {
   var rouletteChannel = guild.channels.resolve(config.channel);
   switch (config.mode) {
     case 'post':
-      await rouletteChannel.send(notifyPost.matches).catch(console.error);
+      await rouletteChannel.send(notifyPost(matches)).catch(console.error);
       
     case 'manual':
       return notifyPost(matches);
